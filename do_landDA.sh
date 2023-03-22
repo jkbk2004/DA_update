@@ -41,14 +41,6 @@ else
   apply_incr_EXEC=${CYCLEDIR}/DA_update/add_jedi_incr/exec/apply_incr
 fi
 
-# executable directories
-INCR_EXECDIR=${LANDDADIR}/add_jedi_incr/exec/
-
-# JEDI directories
-JEDI_EXECDIR=${JEDI_EXECDIR:-"/scratch2/NCEPDEV/land/data/jedi/fv3-bundle/build/bin/"}
-IODA_BUILD_DIR=${IODA_BUILD_DIR:-"/scratch2/BMC/gsienkf/UFS-RNR/UFS-RNR-stack/external/ioda-bundle/build/"}
-JEDI_STATICDIR=${LANDDADIR}/jedi/fv3-jedi/Data/
-
 # storage settings 
 SAVE_INCR="YES" # "YES" to save increment (add others?) JEDI output
 SAVE_TILE=${SAVE_TILE:-"NO"} # "YES" to save background in tile space
