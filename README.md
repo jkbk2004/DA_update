@@ -34,5 +34,4 @@ To run:
 
 1. Edit settings file, edit submit_landDA.sh (your account details, your settings file) 
 >sbatch submit_landDA.sh
->
 
