@@ -34,6 +34,13 @@ source $config_file
 LOGDIR=${OUTDIR}/DA/logs/
 OBSDIR=${OBSDIR:-"/scratch2/NCEPDEV/land/data/DA/"}
 
+# executables
+if [[ -e ${BUILDDIR}/bin/apply_incr.exe ]]; then #prefer cmake-built executables
+  apply_incr_EXEC=${BUILDDIR}/bin/apply_incr.exe
+else
+  apply_incr_EXEC=${CYCLEDIR}/DA_update/add_jedi_incr/exec/apply_incr
+fi
+
 # executable directories
 INCR_EXECDIR=${LANDDADIR}/add_jedi_incr/exec/
 
@@ -45,7 +52,7 @@ JEDI_STATICDIR=${LANDDADIR}/jedi/fv3-jedi/Data/
 # storage settings 
 SAVE_INCR="YES" # "YES" to save increment (add others?) JEDI output
 SAVE_TILE=${SAVE_TILE:-"NO"} # "YES" to save background in tile space
-KEEPJEDIDIR=${KEEPJEDIDIR:-"NO"} # delete DA workdir 
+KEEPJEDIDIR=${KEEPJEDIDIR:-"YES"} # delete DA workdir 
 
 echo 'THISDATE in land DA, '$THISDATE
 
@@ -60,7 +67,7 @@ if [[ ! -e ${OUTDIR}/DA ]]; then
 fi 
 
 if [[ ! -e $JEDIWORKDIR ]]; then 
-    mkdir $JEDIWORKDIR
+    mkdir -p $JEDIWORKDIR
 fi
 
 
@@ -96,7 +103,6 @@ do
 cp ${RSTRDIR}/${FILEDATE}.sfc_data.tile${tile}.nc  ${RSTRDIR}/${FILEDATE}.sfc_data_back.tile${tile}.nc
 done
 fi 
-
 #stage restarts for applying JEDI update (files will get directly updated)
 for tile in 1 2 3 4 5 6 
 do
@@ -274,7 +280,7 @@ if [[ ${DAtype} == 'letkfoi_snow' ]]; then
         if [ -e $JEDIWORKDIR/mem_${ens} ]; then 
                 rm -r $JEDIWORKDIR/mem_${ens}
         fi
-        mkdir $JEDIWORKDIR/mem_${ens} 
+        mkdir -p $JEDIWORKDIR/mem_${ens} 
         for tile in 1 2 3 4 5 6
         do
         cp ${JEDIWORKDIR}/${FILEDATE}.sfc_data.tile${tile}.nc  ${JEDIWORKDIR}/mem_${ens}/${FILEDATE}.sfc_data.tile${tile}.nc
@@ -310,14 +316,14 @@ echo 'do_landDA: calling fv3-jedi'
 source ${JEDI_EXECDIR}/../../../fv3_mods_hera
 
 if [[ $do_DA == "YES" ]]; then
-    srun -n $NPROC_JEDI ${JEDI_EXECDIR}/${JEDI_EXEC} letkf_land.yaml ${LOGDIR}/jedi_letkf.log
+    ${MPIEXEC} -n $NPROC_JEDI ${JEDI_EXECDIR}/${JEDI_EXEC} letkf_land.yaml ${LOGDIR}/jedi_letkf.log
     if [[ $? != 0 ]]; then
         echo "JEDI DA failed"
         exit 10
     fi
 fi 
 if [[ $do_HOFX == "YES" ]]; then  
-    srun -n $NPROC_JEDI ${JEDI_EXECDIR}/${JEDI_EXEC} hofx_land.yaml ${LOGDIR}/jedi_hofx.log
+    ${MPIEXEC} -n $NPROC_JEDI ${JEDI_EXECDIR}/${JEDI_EXEC} hofx_land.yaml ${LOGDIR}/jedi_hofx.log
     if [[ $? != 0 ]]; then
         echo "JEDI hofx failed"
         exit 10
@@ -347,7 +353,7 @@ EOF
     source ${LANDDADIR}/land_mods_hera
 
     # (n=6) -> this is fixed, at one task per tile (with minor code change, could run on a single proc). 
-    srun '--export=ALL' -n 6 ${BUILDDIR}/bin/apply_incr.exe ${LOGDIR}/apply_incr.log
+    ${MPIEXEC} -n 6 ${apply_incr_EXEC} ${LOGDIR}/apply_incr.log
     if [[ $? != 0 ]]; then
         echo "apply snow increment failed"
         exit 10
