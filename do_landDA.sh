@@ -27,7 +27,7 @@ echo "reading DA settings from $config_file"
 
 GFSv17=${GFSv17:-"NO"}
 
-fv3bundle_vn=${fv3bundle_vn:-"20220921"}
+fv3bundle_vn=${fv3bundle_vn:-"release-v1.0"}
 
 source $config_file
 
